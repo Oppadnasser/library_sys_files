@@ -1,0 +1,3 @@
+C:/Users/dell/Desktop/Library-System-With-Files/cmake-build-debug/CMakeFiles/Library_System_With_Files.dir
+C:/Users/dell/Desktop/Library-System-With-Files/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/dell/Desktop/Library-System-With-Files/cmake-build-debug/CMakeFiles/rebuild_cache.dir
