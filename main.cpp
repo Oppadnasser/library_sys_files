@@ -1,5 +1,5 @@
 #include "mainFunctions.cpp"
-
+#include "Author.h"
 int main() {
     int choice;
     while (true) {

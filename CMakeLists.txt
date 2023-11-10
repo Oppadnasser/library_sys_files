@@ -3,4 +3,8 @@ project(Library_System_With_Files)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Library_System_With_Files main.cpp)
+add_executable(Library_System_With_Files main.cpp
+        Author.cpp
+        Author.h
+        book.cpp
+        book.h)

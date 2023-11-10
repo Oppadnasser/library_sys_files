@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Library_System_With_Files::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Library_System_With_Files-Debug-443b74920696a8fda194.json",
+					"jsonFile" : "target-Library_System_With_Files-Debug-a432ccab234724f07daa.json",
 					"name" : "Library_System_With_Files",
 					"projectIndex" : 0
 				}
@@ -49,12 +49,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/dell/Desktop/Library-System-With-Files/cmake-build-debug",
-		"source" : "C:/Users/dell/Desktop/Library-System-With-Files"
+		"build" : "F:/education/file management & processing/Library system/Library-System-With-Files/cmake-build-debug",
+		"source" : "F:/education/file management & processing/Library system/Library-System-With-Files"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 4
+		"minor" : 5
 	}
 }
