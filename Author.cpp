@@ -3,7 +3,7 @@
 //
 
 #include "Author.h"
-Author::Author(std::string id, std::string name, std::string address) {
+Author::Author(string id, string name, string address) {
     strcpy(ID , id.c_str());
     strcpy(Name , name.c_str());
     strcpy(Address , address.c_str());
