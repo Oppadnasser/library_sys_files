@@ -5,6 +5,7 @@
 #define LIBRARY_SYSTEM_WITH_FILES_AUTHOR_H
 #include <iostream>
 #include <cstring>
+#define record_length 73
 using namespace std;
 
 
