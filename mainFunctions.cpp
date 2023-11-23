@@ -6,20 +6,60 @@
 #include <iomanip>
 using namespace std;
 
+int AddId(char filename[],  string id){
+    // fixed length for record is 26 15 for(id) 1 for delimiter and 10 for RNN
+    string I;
+    int RNN;
+    bool added = false;
+    int Old_records = 0 , deleted_records = 0;
+    ofstream newindex("../indexing/temp.txt");
+    ifstream file1(filename);
+    file1 >> Old_records >> deleted_records;
+    file1.seekg(1 , ios::cur);
+    newindex << Old_records+1 << ' ' << deleted_records << '\n';
+    while(getline(file1 , I , '|')){
+        size_t startpos = I.find_first_not_of(' ');
+        if(startpos != string::npos){
+            I.erase(0 , startpos);
+        }
+        if(I == id){
+            newindex.close();
+            remove("/indexing/temp.txt");
+            return -1;
+        }
+        file1 >> RNN;
+        file1.seekg(1 , ios::cur);
+        if(!added && I > id){
+            newindex << setw(15) << id << '|' << setw(10) << deleted_records+Old_records << '\n';
+            newindex << setw(15) << I << '|' << setw(10) << RNN << '\n';
+            added = true;
+        }
+        else {
+            newindex << setw(15) << I << '|' << setw(10) << RNN << '\n';
+        }
+    }
+    if(!added){
+        newindex << setw(15) << id << '|' << setw(10) << deleted_records+Old_records << '\n';
+    }
+    file1.close();
+    newindex.close();
+    remove(filename);
+    rename("../indexing/temp.txt" , filename);
+    return deleted_records+Old_records;
+
+}
+
+
 void addNewAuthor() {
-    ifstream file1("Authors.txt");
-    ofstream file2("temp.txt");
+    fstream file1;
+    file1.open("Authors.txt" ,  ios::app);
     if(!file1.is_open()){
         ofstream f("Authors.txt");
         f << 0 << ' ' << 0 << '\n';
         f.close();
-        file1.open("Authors.txt" , ios::in);
+        file1.open("Authors.txt" ,  ios::app);
     }
-    int Old_records = 0 , deleted_records = 0;
-    file1 >> Old_records >> deleted_records;
-    Old_records++;
     char name[30] , address[30] , Authorid[15];
-    bool added = false;
     cout << "Please Enter Author name:";
     cin.ignore();
     cin.getline(name , 30);
@@ -27,83 +67,64 @@ void addNewAuthor() {
     cin.getline(address , 30);
     cout << "Please enter Author ID:";
     cin.getline(Authorid , 15);
-    file1.seekg(0);
-    string Name , Address , Id;
-    getline(file1 , Name);
-    file2 << Old_records << ' ' << deleted_records << ' ' << '\n';
-    while(getline(file1 , Id , '|') && getline(file1 , Name , '|') && getline(file1 , Address )){
-        size_t startpos = Id.find_first_not_of(' ');
-        if(startpos != string::npos){
-            Id.erase(0 , startpos);
-        }
-        if(Id == Authorid){
-            cout << "this id was exist!";
-            file1.close();
-            file2.close();
-            remove("temp.txt");
-            return;
-        }
-        if(!added && Authorid < Id){
-            file2<<setw(15) <<  Authorid << '|' << setw(30) << name << '|' << setw(30) <<  address << "\n";
-            added = true;
-        }
-        file2 << setw(15) << Id << '|' << Name << '|' << Address << "\n";
+    if(AddId("../indexing/PIDA.txt" , Authorid  ) != -1){
+        file1<<setw(16) <<  Authorid << '|' << setw(30) << name << '|' << setw(30) <<  address << "\n";
     }
-    if(!added)
-        file2<<setw(15) <<  Authorid << '|' << setw(30) << name << '|' << setw(30) <<  address << "\n";
+    else{
+        cout << "this Author ID was used \n failed to add Author";
+    }
     file1.close();
-    file2.close();
-    remove("Authors.txt");
-    rename("temp.txt" , "Authors.txt");
 }
 
 void addNewBook() {
     char Title[30] , authorId[15] , ISBN[15] ;
-    string T , AID , IS;
-    bool added = false;
-    ifstream file1("books.txt");
+    fstream file1("books.txt" , ios::app);
     if(!file1.is_open()){
         ofstream file("books.txt");
         file.close();
-        file1.open("books.txt" , ios::in);
+        file1.open("books.txt" , ios::app);
     }
-    ofstream file2("temp.txt");
     cout << "Please Enter Book Title:";
     cin.ignore();
     cin.getline(Title , 30);
     cout << "Please Enter Book ISBN";
-//    cin.ignore();
     cin.getline(ISBN , 15);
     cout << "Please Enter Author Id of this book:";
-//    cin.ignore();
     cin.getline(authorId , 15);
-    while(getline(file1 , IS , '|') && getline(file1 , T, '|') && getline(file1 , AID ) ){
-
-        size_t startpos = IS.find_first_not_of(' ');
-        if(startpos != string::npos){
-            IS.erase(0 , startpos);
-        }
-        if(IS == ISBN){
-            cout << "This ISBN was used to another book!\nfailed to add this book!\n";
-            file1.close();
-            file2.close();
-            remove("temp.txt");
-            return;
-        }
-        if( !added && ISBN < IS ){
-            file2 << setw(15) << ISBN << '|'<< setw(30)  << Title << '|' << setw(15) << authorId << '\n';
-            added = true;
-        }
-        file2 << setw(15) << IS << '|' << T << '|' << AID << '\n';
+    if(AddId("../indexing/PIDB.txt" , ISBN) != -1){
+        file1 << setw(16) << ISBN << '|'<< setw(30)  << Title << '|' << setw(15) << authorId << '\n';
     }
-    if(!added){
-        file2 << setw(15) << ISBN << '|'<< setw(30)  << Title << '|' << setw(15) << authorId << '\n';
+    else{
+        cout << "this book ISBN used\nfailed to add this book!";
     }
+//    while(getline(file1 , IS , '|') && getline(file1 , T, '|') && getline(file1 , AID ) ){
+//
+//        size_t startpos = IS.find_first_not_of(' ');
+//        if(startpos != string::npos){
+//            IS.erase(0 , startpos);
+//        }
+//        if(IS == ISBN){
+//            cout << "This ISBN was used to another book!\nfailed to add this book!\n";
+//            file1.close();
+//            file2.close();
+//            remove("temp.txt");
+//            return;
+//        }
+//        if( !added && ISBN < IS ){
+//            file2 << setw(15) << ISBN << '|'<< setw(30)  << Title << '|' << setw(15) << authorId << '\n';
+//            added = true;
+//        }
+//        file2 << setw(15) << IS << '|' << T << '|' << AID << '\n';
+//    }
+//    if(!added){
+//        file2 << setw(15) << ISBN << '|'<< setw(30)  << Title << '|' << setw(15) << authorId << '\n';
+//    }
     file1.close();
-    file2.close();
-    remove("books.txt");
-    rename("temp.txt" , "books.txt");
+//    file2.close();
+//    remove("books.txt");
+//    rename("temp.txt" , "books.txt");
 }
+
 
 void updateAuthorName(int authorId) {}
 
