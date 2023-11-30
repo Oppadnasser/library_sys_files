@@ -84,3 +84,10 @@ int main() {
         }
     }
 }
+//int main(){
+//    vector<int> t = search(3000 , "../indexing/PIDB.txt");
+//    for(int a : t){
+//        cout << a <<'\n';
+//    }
+////    delete_tuple_in_index(138 , "../indexing/PIDB.txt");
+//}

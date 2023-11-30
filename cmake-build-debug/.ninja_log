@@ -1,0 +1,9 @@
+# ninja log v5
+1	1039	7230721355680459	CMakeFiles/library_sys_files.dir/book.cpp.obj	39c1d380e6640389
+19	1045	7230721355730362	CMakeFiles/library_sys_files.dir/Author.cpp.obj	2a5df1f62d3322bb
+6	810	7230722407962238	CMakeFiles/library_sys_files.dir/mainFunctions.cpp.obj	183656204070897
+15	811	7230722407972205	CMakeFiles/library_sys_files.dir/main.cpp.obj	fdc710ec709a9e34
+2	212	7230726411362851	build.ninja	c8790dba62d753f2
+8	279	7230724358906170	library_sys_files.exe	ee54e8f7482bf58d
+10	1869	7230731740553594	CMakeFiles/library_sys_files.dir/main.cpp.obj	fdc710ec709a9e34
+1870	2287	7230731744679266	library_sys_files.exe	ee54e8f7482bf58d
