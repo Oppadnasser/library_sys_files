@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/oppad/Desktop/tempA1/cmake-build-debug"
+			"value" : "f:/education/tempA1/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -643,7 +643,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/oppad/Desktop/tempA1/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "F:/education/tempA1/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -715,7 +715,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/oppad/Desktop/tempA1"
+			"value" : "F:/education/tempA1"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1335,7 +1335,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/oppad/Desktop/tempA1/cmake-build-debug"
+			"value" : "F:/education/tempA1/cmake-build-debug"
 		},
 		{
 			"name" : "Library_System_With_Files_IS_TOP_LEVEL",
@@ -1359,7 +1359,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/oppad/Desktop/tempA1"
+			"value" : "F:/education/tempA1"
 		},
 		{
 			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",

@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/oppad/Desktop/tempA1/cmake-build-debug",
-		"source" : "C:/Users/oppad/Desktop/tempA1"
+		"build" : "F:/education/tempA1/cmake-build-debug",
+		"source" : "F:/education/tempA1"
 	},
 	"version" : 
 	{
