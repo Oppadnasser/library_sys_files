@@ -1,6 +1,6 @@
 CMakeFiles/Library_System_With_Files.dir/Author.cpp.obj: \
- F:\education\file\ management\ &\ processing\Library\ system\Library-System-With-Files\Author.cpp \
- F:\education\file\ management\ &\ processing\Library\ system\Library-System-With-Files\Author.h \
+ C:\Users\oppad\Desktop\tempA1\Author.cpp \
+ C:\Users\oppad\Desktop\tempA1\Author.h \
  C:/Program\ Files/JetBrains/CLion\ 2023.2.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/iostream \
  C:/Program\ Files/JetBrains/CLion\ 2023.2.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/requires_hosted.h \
  C:/Program\ Files/JetBrains/CLion\ 2023.2.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/x86_64-w64-mingw32/bits/c++config.h \

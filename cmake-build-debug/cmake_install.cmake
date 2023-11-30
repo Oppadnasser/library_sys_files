@@ -1,4 +1,4 @@
-# Install script for directory: F:/education/file management & processing/Library system/Library-System-With-Files
+# Install script for directory: C:/Users/oppad/Desktop/tempA1
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "F:/education/file management & processing/Library system/Library-System-With-Files/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/oppad/Desktop/tempA1/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
