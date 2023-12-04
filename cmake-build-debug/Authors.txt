@@ -1,8 +1,8 @@
-*62|18| *22|19| *132|24| -1
- 58483|aaif|alksfd|20
-*6784|naser|dfiae|19
- 6775|hoho|uaow|17
-*68484|ooaf|adfk|18
- 41224|alaicai|aliddr|23
- 47272|alskdf|asdfioa|23
-*38882|akldfia|kcaouhj|24
+-1
+ 1000|oppad|egypt|19
+ 1500|nasser|6th of october|29
+ 4000|sayf|elmohandseen|25
+ 2500|abd elrahman|eltagamo3|30
+ 2000|omar|nasr city|22
+ 3000|oppad|madynaty|22
+ 5000|omar|any place|22

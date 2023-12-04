@@ -10,6 +10,203 @@
 #define tuple_length 27
 using namespace std;
 
+// { place of att in secondary file , last offset}
+vector<int> search_secondary(string id , char file_name[])
+{
+    vector<int> temp = {-1 , -1};
+    ifstream file1(file_name , ios::in | ios ::binary);
+    if(!file1.is_open()){
+        ofstream f(file_name , ios::out | ios::binary);
+        f.close();
+        return temp;
+    }
+    file1.seekg(0 , ios::end);
+    int start = 0;
+    int end = (file1.tellg() /27)-1;
+    while(end >= start){
+        int mid = (start + end)/2;
+        file1.seekg((mid * 27) , ios::beg);
+        string Id ; // ID means attribute
+        int offset;
+//        file1 >> Id;
+        getline(file1 , Id , '|');
+        size_t startpos = Id.find_first_not_of(' ');
+        if(startpos != string::npos){
+            Id.erase(0 , startpos);
+        }
+        file1.seekg(1 , ios::cur);
+        file1 >> offset;
+        if(Id == id){
+            temp[1] = offset;
+            temp[0] = mid*27;
+            return temp;
+        }
+        if(Id < id){
+            start = mid+1;
+        }
+        else{
+            end = mid-1;
+        }
+    }
+
+    return temp;
+}
+bool AddAttribute(char filename[],  string val , int offset , int location , string Id){
+    int place;
+    bool added = false;
+    int preoffset = -1;
+    string line;
+    string attribute;
+    if(filename == "../indexing/SNA.txt"){
+        fstream file("../indexing/listA.txt" , ios::in | ios::app | ios::binary);
+        file << setw(30) << Id <<' '<< setw(10) << offset << '\n';
+        file.seekg(0, ios::end);
+        place = file.tellp();
+        file.close();
+    }
+    else{
+        fstream file("../indexing/listB.txt" , ios::app | ios::binary);
+        file << setw(30) << Id << ' ' << setw(10) << offset << '\n';
+        file.seekg(0, ios::end);
+        place = file.tellp();
+        file.close();
+    }
+    place-= 42;
+    ifstream secondarfile(filename , ios::in | ios::binary);
+    if(!secondarfile.is_open()){
+        ofstream f(filename , ios::out | ios::binary);
+        f.close();
+        secondarfile.open(filename , ios::in | ios::binary);
+    }
+    ofstream tempfile("../indexing/tempfile.txt" , ios::out|ios::binary);
+    if(location == -1){
+        while(getline(secondarfile , attribute , '|')){ //read all records in index file
+            size_t startpos = attribute.find_first_not_of(' ');
+            if(startpos != string::npos){
+                attribute.erase(0 , startpos);
+            }
+            secondarfile >> preoffset;
+            secondarfile.seekg(1 , ios::cur);
+            if(!added && attribute > val){ // if record to be added is less than specific id in index file
+                tempfile << setw(15) << val << '|' << setw(10) << place << '\n';// add it first
+                tempfile << setw(15) << attribute << '|' << setw(10) << preoffset << '\n'; // then add another record
+                added = true;
+            }
+            else {
+                tempfile << setw(15) << attribute << '|' << setw(10) << preoffset << '\n';
+            }
+        }
+        if(!added){
+            tempfile << setw(15) << val << '|' << setw(10) << place << '\n';
+        }
+    }
+    else{
+        while(secondarfile.tellg() != location){
+            getline(secondarfile, line);
+            tempfile << line << '\n';
+        }
+        secondarfile >> attribute;
+        secondarfile >> preoffset;
+        secondarfile.seekg(1 , ios::cur);
+        tempfile << setw(16) << attribute << setw(10) << place << '\n';
+        while(getline(secondarfile, line)){
+            tempfile << line << '\n';
+        }
+
+    }
+    secondarfile.close();
+    tempfile.close();
+    remove(filename);
+    rename("../indexing/tempfile.txt" , filename);
+
+    return true;
+
+}
+void DeleteAttribute(char filename[],  string val , int location_in_S , int last_offset , string Id){
+    fstream list_file;
+    bool verified = false;
+    string line , id;
+    int preoffset  , off, location_to_delete;
+    fstream secondary_file(filename , ios::in | ios::binary);
+    ofstream tempS("../indexing/tempS.txt" , ios::out | ios::binary);
+    ofstream templist("../indexing/tempL.txt" , ios::out | ios::binary);
+    if(filename == "../indexing/SAIDB.txt")
+        list_file.open("../indexing/listB.txt" , ios::in | ios::binary);
+    else
+        list_file.open("../indexing/listA.txt", ios::in | ios::binary);
+    while(secondary_file.tellg() != location_in_S){
+        getline(secondary_file , line);
+        tempS << line << '\n';
+    }
+    list_file.seekg(last_offset);
+    while(true){
+    location_to_delete = list_file.tellg();
+    list_file >> id >> preoffset;
+    if(id == Id){
+        break;
+    }
+    list_file.seekg(preoffset);
+    }
+    list_file.seekg(0 , ios::beg);
+    while(list_file.tellg() != location_to_delete){
+        getline(list_file , line);
+        templist << line << '\n';
+    }
+    getline(list_file , line);
+    while(list_file >> id >> off){
+        if(!verified && off == location_to_delete){
+            templist << setw(30) << id  << setw(11) << preoffset << '\n';
+            verified = true;
+        }
+        else{
+            if(off > location_to_delete)
+                off-=42;
+            templist << setw(30) << id << setw(11) << off << '\n';
+        }
+        list_file.seekg(1 , ios::cur);
+    }
+    getline(secondary_file , line , '|');
+    int temp;
+    secondary_file >> temp;
+    secondary_file.seekg(1 , ios::cur);
+    if(temp == location_to_delete){
+        if(preoffset != -1){
+            tempS << line << '|' << setw(10) << preoffset << '\n';
+        }
+    }
+    else{
+        tempS << line << '|' << setw(10) << temp << '\n';
+    }
+    while(getline(secondary_file , line)){
+        tempS << line << '\n';
+    }
+    tempS.close();
+    templist.close();
+    secondary_file.close();
+    list_file.close();
+    if(filename == "../indexing/SAIDB.txt"){
+        remove("../indexing/listB.txt");
+        rename("../indexing/tempL.txt" ,"../indexing/listB.txt");
+    }
+    else{
+        remove("../indexing/listA.txt");
+        rename("../indexing/tempL.txt" ,"../indexing/listA.txt");
+    }
+    remove(filename);
+    rename("../indexing/tempS.txt" , filename);
+    tempS.open("../indexing/tempS.txt" , ios::out | ios::binary);
+    secondary_file.open(filename , ios::in | ios::binary);
+    while(secondary_file >> line >> off){
+        if(off > location_to_delete)
+            off-=42;
+        tempS << setw(16) << line << setw(10) << off << '\n';
+    }
+    tempS.close();
+    secondary_file.close();
+    remove(filename);
+    rename("../indexing/tempS.txt" , filename);
+
+}
 bool sortbysec(const pair<int,int> &a,const pair<int,int> &b)
 {
     return (a.second < b.second);
@@ -29,7 +226,7 @@ bool AddId(char filename[],  string id , int offset){ // offset is the offset of
         }
         if(I == id){ // check if this id was used
             newindex.close();
-            remove("/indexing/temp1.txt");
+            remove("../indexing/temp1.txt");
             return false;
         }
         file1 >> off;
@@ -197,6 +394,8 @@ void addNewAuthor(){
             file1 << setw(record_size-1) <<record << record_size<< "\n";
         } else {
             cout << "this Author ID was used \n failed to add Author";
+            file1.close();
+            return;
         }
         file1.close();
     }
@@ -259,6 +458,9 @@ void addNewAuthor(){
         remove("Authors.txt");
         rename("temp.txt" , "Authors.txt");
     }
+    vector<int> tem = search_secondary(name , "../indexing/SNA.txt");
+    AddAttribute("../indexing/SNA.txt",name,tem[1] , tem[0], Authorid);
+
 }
 void deleteAuthor(int ID) {
     //temp {location index  , location data file}
@@ -358,7 +560,7 @@ void addNewBook() {
         if (AddId("../indexing/PIDB.txt", ISBN , offset)) {
             file1 << setw(record_size-1) <<record << record_size<< "\n";
         } else {
-            cout << "this Author ID was used \n failed to add Author";
+            cout << "this Book ISBN was used \n failed to add Book";
         }
         file1.close();
     }
@@ -388,6 +590,8 @@ void addNewBook() {
                 file1 << setw(record_size-1) <<record << record_size<< "\n";
             } else {
                 cout << "this ISBN was used \n failed to add book";
+                file1.close();
+                return;
             }
             file1.close();
             return;
@@ -421,6 +625,8 @@ void addNewBook() {
         remove("books.txt");
         rename("temp.txt" , "books.txt");
     }
+    vector<int> tem = search_secondary(authorId , "../indexing/SAIDB.txt");
+    AddAttribute("../indexing/SAIDB.txt",authorId,tem[1] , tem[0], ISBN);
 }
 
 void deleteBook(int ISBN) {
@@ -475,19 +681,221 @@ void deleteBook(int ISBN) {
     newfile.close();
     remove("books.txt");
     rename("temp.txt" , "books.txt");
+
+    data_file.open("books.txt" , ios::in | ios::binary);
+    getline(data_file, line);
+    data_file.seekg(temp[1] , ios::cur);
+    getline(data_file , line , '|');
+    getline(data_file , line , '|');
+    getline(data_file , line , '|');
+    data_file.close();
+    id = to_string(ISBN);
+    temp = search_secondary(line , "../indexing/SAIDB.txt");
+    DeleteAttribute("../indexing/SAIDB.txt",line , temp[0] ,temp[1] , id);
 }
 
 void updateAuthorName(int authorId) {}
 
 void updateBookTitle(int ISBN) {}
 
-
-
 void printAuthor(int ID) {}
 
 void printBook(int ISBN) {}
 
-void writeQuery() {}
+vector<string> split(string stringWord, char delimiter) {
+    vector<string> queryVector;
+    string word = "";
+    for (int i = 0; i < stringWord.length(); i++) {
+        if (stringWord[i] == ';') {
+            queryVector.push_back(word);
+            break;
+        }
+        if (stringWord[i] == delimiter) {
+            queryVector.push_back(word);
+            word = "";
+        } else {
+            word = word + stringWord[i];
+        }
+    }
+    cout<<endl;
+    cout<<"Query Vector"<<endl;
+    for (int i = 0; i < queryVector.size(); i++) {
+        cout << "v[" << i << "]" << queryVector[i] << endl;
+    }
+    return queryVector;
+}
+
+void writeQuery() {
+    // Select all from Authors where Author ID="xxx";
+    vector <string> myQuery;
+    vector <string> myQuery2;
+    string wantedTubles, wantedTable, wantedAttribute, condition, value, query_1, getquery;
+    cout << "Enter your query :) >>  " << endl;
+    cin.ignore();
+    getline(cin, query_1);
+    myQuery = split(query_1, ' ');
+    /// converting all to lower case
+    for (int i = 0; i < myQuery.size(); i++) {
+        transform(myQuery[i].begin(), myQuery[i].end(), myQuery[i].begin(), ::tolower);
+    }
+    getquery = myQuery[0];
+    wantedTubles = myQuery[1];
+    wantedTable = myQuery[3];
+    condition = myQuery[5];
+    wantedAttribute = condition.substr(0, condition.find("="));
+    condition = condition.substr(condition.find("=")+1 , condition.length());//Select all from Authors where AuthorID=’5566';
+    value = condition.substr(1, condition.length() - 2);
+
+    condition = "=";
+    cout<<"wantedTubles: "<<wantedTubles<<endl;
+    cout<<"wantedTable: "<<wantedTable<<endl;
+    cout<<"wantedAttribute: "<<wantedAttribute<<endl;
+    cout<<"value: "<<value<<endl;
+    cout<<"condition: "<<condition<<endl;
+
+    if(getquery == "select")
+    {
+        if(wantedTable == "authors")
+        {
+            if(wantedTubles == "*" || wantedTubles == "all")
+            {
+                if(condition == "=") {
+                    if (wantedAttribute == "authorid") {
+                        int x = stoi(value);
+                        int offset = search(x, "../indexing/PIDA.txt")[1];
+                        if(offset == -1){
+                            cout << "invalid Author id";
+                            return;
+                        }
+                        ifstream file("Authors.txt", ios::in | ios::binary);
+                        string line;
+                        getline(file, line);
+                        file.seekg(offset, ios::cur);
+                        getline(file, line);
+                        cout << "Author ID: " << line.substr(0, line.find("|")) << endl;
+                        line = line.substr(line.find("|") + 1, line.length());
+                        cout << "Author Name: " << line.substr(0, line.find("|")) << endl;
+                        line = line.substr(line.find("|") + 1, line.length());
+                        cout << "Author Address: " << line.substr(0, line.find("|")) << endl;
+                        file.close();
+
+                    }
+                }
+
+            }
+
+        }
+        else if(wantedTable == "Books")
+        {
+            if(wantedTubles == "*" || wantedTubles == "all")
+            {
+                if(condition == "=")
+                {
+                    if(wantedAttribute == "ISBN")
+                    {
+                        int x = 0;
+                        stringstream geek(value);
+                        geek >> x;
+                        int offset = search(x , "../indexing/PIDB.txt")[1];
+                        ifstream file("books.txt" , ios::in | ios::binary);
+                        string line;
+                        getline(file , line);
+                        file.seekg(offset , ios::cur);
+                        getline(file , line);
+                        cout<<"ISBN: "<<line.substr(0 , line.find("|"))<<endl;
+                        line = line.substr(line.find("|")+1 , line.length());
+                        cout<<"Book Title: "<<line.substr(0 , line.find("|"))<<endl;
+                        line = line.substr(line.find("|")+1 , line.length());
+                        cout<<"Author ID: "<<line.substr(0 , line.find("|"))<<endl;
+                        file.close();
+
+                    }
+                }
+            }
+        }
+    }/*
+    else if(getquery == "Delete")
+    {
+        if(wantedTable == "Authors")
+        {
+            if(condition == "=")
+            {
+                if(wantedAttribute == "Author_ID")
+                {
+                    int x = 0;
+                    stringstream geek(value);
+                    geek >> x;
+                    deleteAuthor(x);
+                }
+            }
+        }
+        else if(wantedTable == "Books")
+        {
+            if(condition == "=")
+            {
+                if(wantedAttribute == "ISBN")
+                {
+                    int x = 0;
+                    stringstream geek(value);
+                    geek >> x;
+                    deleteBook(x);
+                }
+            }
+        }
+    }
+    else if(getquery == "Update")
+    {
+        if(wantedTable == "Authors")
+        {
+            if(condition == "=")
+            {
+                if(wantedAttribute == "Author_ID")
+                {
+                    int x = 0;
+                    stringstream geek(value);
+                    geek >> x;
+                    updateAuthorName(x);
+                }
+            }
+        }
+        else if(wantedTable == "Books")
+        {
+            if(condition == "=")
+            {
+                if(wantedAttribute == "ISBN")
+                {
+                    int x = 0;
+                    stringstream geek(value);
+                    geek >> x;
+                    updateBookTitle(x);
+                }
+            }
+        }
+    }
+    else if(getquery == "Insert")
+    {
+        if(wantedTable == "Authors")
+        {
+            addNewAuthor();
+        }
+        else if(wantedTable == "Books")
+        {
+            addNewBook();
+        }
+    }
+    else if(getquery == "Exit")
+    {
+        Exit();
+    }
+    else
+    {
+        cout<<"Invalid Query"<<endl;
+    }*/
+
+
+    //displayQueryResult(wantedTubles, wantedTable, wantedAttribute, condition, value);
+
+}
 
 void Exit() {
     cout << "GOOD BYE MY DEAR USER :)";
