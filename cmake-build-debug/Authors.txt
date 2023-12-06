@@ -1,8 +1,8 @@
--1
- 1000|oppad|egypt|19
- 1500|nasser|6th of october|29
- 4000|sayf|elmohandseen|25
- 2500|abd elrahman|eltagamo3|30
- 2000|omar|nasr city|22
- 3000|oppad|madynaty|22
- 5000|omar|any place|22
+*0|17| *126|19| -1
+*7000|oppad|any|17
+ 4000|nasser|ouaf|19
+ 2000|essam|afia|18
+ 3000|shahd|afifd|19
+ 9000|oppad|anyplace|22
+ 6050|hany|faoiea|19
+*8000|essam|afiao|19

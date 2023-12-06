@@ -399,64 +399,64 @@ void addNewAuthor(){
         }
         file1.close();
     }
-    else{
-        vector<pair<int,int>> availlist;
-        while(AVIL_List != "-1"){
-            addtoavaillist(availlist , AVIL_List);
+    else {
+        vector<pair<int, int>> availlist;
+        while (AVIL_List != "-1") {
+            addtoavaillist(availlist, AVIL_List);
             file1 >> AVIL_List;
         }
-        file1.seekg(1 , ios::cur);
+        file1.seekg(1, ios::cur);
         int start = file1.tellg();
-        pair<int , int > place = make_pair(0,0); // place{offset , size}
-        for(auto a : availlist){
-            if(a.second >= record_size){
+        pair<int, int> place = make_pair(0, 0); // place{offset , size}
+        for (auto a: availlist) {
+            if (a.second >= record_size) {
                 place = a;
                 break;
             }
         }
-        if(place.first==0 && place.second==0){
+        if (place.first == 0 && place.second == 0) {
             int start = file1.tellg();
             file1.close();
-            file1.open("Authors.txt" ,  ios:: in| ios::app|ios::binary);
-            file1.seekg(0 , ios::end);
+            file1.open("Authors.txt", ios::in | ios::app | ios::binary);
+            file1.seekg(0, ios::end);
             int offset = file1.tellp();
             offset -= start;
-            if (AddId("../indexing/PIDA.txt", Authorid , offset)) {
-                file1 << setw(record_size-1) <<record << record_size<< "\n";
+            if (AddId("../indexing/PIDA.txt", Authorid, offset)) {
+                file1 << setw(record_size - 1) << record << record_size << "\n";
             } else {
                 cout << "this Author ID was used \n failed to add Author";
             }
             file1.close();
-            return;
-        }
-        ofstream newfile("temp.txt" , ios::out | ios::binary);
-        for(auto a : availlist){
-            if(a.second != place.second){
-                newfile << '*' << a.first << '|' << a.second << '|' << ' ';
+        } else {
+            ofstream newfile("temp.txt", ios::out | ios::binary);
+            for (auto a: availlist) {
+                if (a.second != place.second) {
+                    newfile << '*' << a.first << '|' << a.second << '|' << ' ';
+                }
             }
-        }
-        newfile << -1 << '\n';
-        while(file1.tellg() != start+place.first){ // write all previous records without change in offset
-            string line;
-            getline(file1 , line);
-            newfile << line << '\n';
-        }
-        string line;                          // line deleted and replacement with new record
-        getline(file1 , line);
-        while(record_size < place.second){
-            record += '/';
-            record_size++;
-        }
-        newfile <<setw(record_size-1) << record << record_size << '\n';
+            newfile << -1 << '\n';
+            while (file1.tellg() != start + place.first) { // write all previous records without change in offset
+                string line;
+                getline(file1, line);
+                newfile << line << '\n';
+            }
+            string line;                          // line deleted and replacement with new record
+            getline(file1, line);
+            while (record_size < place.second) {
+                record += '/';
+                record_size++;
+            }
+            newfile << setw(record_size - 1) << record << record_size << '\n';
 
-        while(getline(file1 , line)){
-            newfile << line << '\n';
+            while (getline(file1, line)) {
+                newfile << line << '\n';
+            }
+            AddId("../indexing/PIDA.txt", Authorid, place.first);
+            file1.close();
+            newfile.close();
+            remove("Authors.txt");
+            rename("temp.txt", "Authors.txt");
         }
-        AddId("../indexing/PIDA.txt",Authorid, place.first);
-        file1.close();
-        newfile.close();
-        remove("Authors.txt");
-        rename("temp.txt" , "Authors.txt");
     }
     vector<int> tem = search_secondary(name , "../indexing/SNA.txt");
     AddAttribute("../indexing/SNA.txt",name,tem[1] , tem[0], Authorid);
@@ -484,7 +484,7 @@ void deleteAuthor(int ID) {
     int start = data_file.tellg();
     int offset = temp[1]; // offset is location of record to be deleted
     data_file.seekg(start+offset);
-    string l1 , l2 , line , id; // to check length of each avail list if there differentiate
+    string l1 , line , id; // to check length of each avail list if there differentiate
     getline(data_file , line);
     n.second = line.length() -1;
     availlist.push_back(n);
@@ -498,6 +498,14 @@ void deleteAuthor(int ID) {
         getline(data_file , line);
         newfile << line << '\n';
     }
+    string val;
+    int s = 0;
+    getline(data_file , val , '|');
+    s+=val.length();
+    getline(data_file , val , '|');
+    s+=val.length();
+    s+=2;
+    data_file.seekg(-s , ios::cur);
     getline(data_file , line);
     size_t startpos = line.find_first_not_of(' ');
     if(startpos != string::npos){
@@ -505,7 +513,6 @@ void deleteAuthor(int ID) {
     }// record to be deleted
     n.second = line.length();
     newfile << "*" <<line << '\n';  // mark as readed and add previous AVIL_LIST
-    // all offset's records after deleted record will increase by
     while(getline(data_file , line)){
         newfile << line << '\n';
     }
@@ -514,6 +521,8 @@ void deleteAuthor(int ID) {
     newfile.close();
     remove("Authors.txt");
     rename("temp.txt" , "Authors.txt");
+    temp = search_secondary(val , "../indexing/SNA.txt");
+    DeleteAttribute("../indexing/SNA.txt",  val ,temp[0] , temp[1] , to_string(ID));
 }
 
 void addNewBook() {
@@ -561,69 +570,70 @@ void addNewBook() {
             file1 << setw(record_size-1) <<record << record_size<< "\n";
         } else {
             cout << "this Book ISBN was used \n failed to add Book";
+            file1.close();
+            return;
         }
-        file1.close();
     }
-    else{
-        vector<pair<int,int>> availlist;
-        while(AVIL_List != "-1"){
-            addtoavaillist(availlist , AVIL_List);
+    else {
+        vector<pair<int, int>> availlist;
+        while (AVIL_List != "-1") {
+            addtoavaillist(availlist, AVIL_List);
             file1 >> AVIL_List;
         }
-        file1.seekg(1 , ios::cur);
+        file1.seekg(1, ios::cur);
         int start = file1.tellg();
-        pair<int , int > place = make_pair(0,0); // place{offset , size}
-        for(auto a : availlist){
-            if(a.second >= record_size){
+        pair<int, int> place = make_pair(0, 0); // place{offset , size}
+        for (auto a: availlist) {
+            if (a.second >= record_size) {
                 place = a;
                 break;
             }
         }
-        if(place.first==0 && place.second==0){
+        if (place.first == 0 && place.second == 0) {
             int start = file1.tellg();
             file1.close();
-            file1.open("books.txt" ,  ios:: in| ios::app|ios::binary);
-            file1.seekg(0 , ios::end);
+            file1.open("books.txt", ios::in | ios::app | ios::binary);
+            file1.seekg(0, ios::end);
             int offset = file1.tellp();
             offset -= start;
-            if (AddId("../indexing/PIDB.txt", ISBN , offset)) {
-                file1 << setw(record_size-1) <<record << record_size<< "\n";
+            if (AddId("../indexing/PIDB.txt", ISBN, offset)) {
+                file1 << setw(record_size - 1) << record << record_size << "\n";
             } else {
                 cout << "this ISBN was used \n failed to add book";
                 file1.close();
                 return;
             }
             file1.close();
-            return;
-        }
-        ofstream newfile("temp.txt" , ios::out | ios::binary);
-        for(auto a : availlist){
-            if(a.second != place.second){
-                newfile << '*' << a.first << '|' << a.second << '|' << ' ';
+        } else {
+            ofstream newfile("temp.txt", ios::out | ios::binary);
+            for (auto a: availlist) {
+                if (a.second != place.second) {
+                    newfile << '*' << a.first << '|' << a.second << '|' << ' ';
+                }
             }
-        }
-        newfile << -1 << '\n';
-        while(file1.tellg() != start+place.first){ // write all previous records without change in offset
-            string line;
-            getline(file1 , line);
-            newfile << line << '\n';
-        }
-        string line;                          // line deleted and replacement with new record
-        getline(file1 , line);
-        while(record_size < place.second){
-            record += '/';
-            record_size++;
-        }
-        newfile <<setw(record_size-1) << record << record_size << '\n';
+            newfile << -1 << '\n';
+            while (file1.tellg() != start + place.first) { // write all previous records without change in offset
+                string line;
+                getline(file1, line);
+                newfile << line << '\n';
+            }
+            string line;                          // line deleted and replacement with new record
+            getline(file1, line);
+            while (record_size < place.second) {
+                record += '/';
+                record_size++;
+            }
+            newfile << setw(record_size - 1) << record << record_size << '\n';
 
-        while(getline(file1 , line)){
-            newfile << line << '\n';
+            while (getline(file1, line)) {
+                newfile << line << '\n';
+            }
+            AddId("../indexing/PIDB.txt", ISBN, place.first);
+            file1.close();
+            newfile.close();
+            remove("books.txt");
+            rename("temp.txt", "books.txt");
         }
-        AddId("../indexing/PIDB.txt",ISBN, place.first);
-        file1.close();
-        newfile.close();
-        remove("books.txt");
-        rename("temp.txt" , "books.txt");
     }
     vector<int> tem = search_secondary(authorId , "../indexing/SAIDB.txt");
     AddAttribute("../indexing/SAIDB.txt",authorId,tem[1] , tem[0], ISBN);
@@ -651,7 +661,7 @@ void deleteBook(int ISBN) {
     int start = data_file.tellg();
     int offset = temp[1]; // offset is location of record to be deleted
     data_file.seekg(start+offset);
-    string l1 , l2 , line , id; // to check length of each avail list if there differentiate
+    string l1 , l2 , line; // to check length of each avail list if there differentiate
     getline(data_file , line);
     n.second = line.length() -1;
     availlist.push_back(n);
@@ -665,6 +675,16 @@ void deleteBook(int ISBN) {
         getline(data_file , line);
         newfile << line << '\n';
     }
+    string val;
+    int s = 0;
+    getline(data_file , val , '|');
+    s+=val.length();
+    getline(data_file , val , '|');
+    s+=val.length();
+    getline(data_file , val , '|');
+    s+=val.length();
+    s+=3;
+    data_file.seekg(-s , ios::cur);
     getline(data_file , line);
     size_t startpos = line.find_first_not_of(' ');
     if(startpos != string::npos){
@@ -681,17 +701,8 @@ void deleteBook(int ISBN) {
     newfile.close();
     remove("books.txt");
     rename("temp.txt" , "books.txt");
-
-    data_file.open("books.txt" , ios::in | ios::binary);
-    getline(data_file, line);
-    data_file.seekg(temp[1] , ios::cur);
-    getline(data_file , line , '|');
-    getline(data_file , line , '|');
-    getline(data_file , line , '|');
-    data_file.close();
-    id = to_string(ISBN);
-    temp = search_secondary(line , "../indexing/SAIDB.txt");
-    DeleteAttribute("../indexing/SAIDB.txt",line , temp[0] ,temp[1] , id);
+    temp = search_secondary(val , "../indexing/SAIDB.txt");
+    DeleteAttribute("../indexing/SAIDB.txt",val , temp[0] ,temp[1] , to_string(ISBN));
 }
 
 void updateAuthorName(int authorId) {}
