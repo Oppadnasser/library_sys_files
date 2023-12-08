@@ -2,7 +2,7 @@
 
 
 int main() {
-    int choice;
+    char choice;
     while (true) {
         cout <<"\nwelcome to our library system :) \nAvailable Options :\n"
                "1- Add New Author\n"
@@ -14,66 +14,72 @@ int main() {
                "7- Print Author (Author ID) \n"
                "8- Print Book (ISBN) \n"
                "9- Write Query \n"
-               "10- Exit\n";
+               "0- Exit\n";
         cout << "\nchoose from options above: \n";
         cin >> choice;
 
         switch (choice) {
-            case 1:
+            case '1':
                 addNewAuthor();
                 break;
 
-            case 2:
+            case '2':
                 addNewBook();
                 break;
 
-            case 3:
+            case '3': {
                 int authorId;
+                string newname;
                 cout << "enter the author id:";
                 cin >> authorId;
-                updateAuthorName(authorId);
+                cout << "enter new name:";
+                cin >> newname;
+                updateAuthorName(authorId, newname);
                 break;
-
-            case 4: {
+            }
+            case '4': {
                 int bookISBN;
                 cout << "enter the book ISBN:";
                 cin >> bookISBN;
-                updateBookTitle(bookISBN);
+                string newtitle;
+                cout << "Please enter new title:";
+                cin >> newtitle;
+                updateBookTitle(bookISBN ,newtitle);
                 break;
             }
-            case 5: {
+            case '5': {
                 int bookISBN;
                 cout << "enter the book ISBN:";
                 cin >> bookISBN;
                 deleteBook(bookISBN);
                 break;
             }
-            case 6: {
+            case '6': {
                 int authorID;
                 cout << "enter the author ID:";
                 cin >> authorID;
                 deleteAuthor(authorID);
                 break;
             }
-            case 7: {
+            case '7': {
                 int authorID;
                 cout << "enter the author ID:";
                 cin >> authorID;
                 printAuthor(authorID);
                 break;
             }
-            case 8: {
+            case '8': {
                 int bookISBN;
                 cout << "enter the book ISBN:";
                 cin >> bookISBN;
                 printBook(bookISBN);
                 break;
             }
-            case 9:
+            case '9':
                 writeQuery();
                 break;
 
-            case 10: {
+            case '0': {
                 Exit();
                 break;
             }

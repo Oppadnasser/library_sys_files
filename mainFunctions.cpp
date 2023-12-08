@@ -705,13 +705,121 @@ void deleteBook(int ISBN) {
     DeleteAttribute("../indexing/SAIDB.txt",val , temp[0] ,temp[1] , to_string(ISBN));
 }
 
-void updateAuthorName(int authorId) {}
+void updateAuthorName(int authorId , string newname) {
+    int location = search(authorId , "../indexing/PIDA.txt")[1];
+    if(location == -1){
+        cout << "invalid author id\n";
+        return;
+    }
+    string line , name , address , id;
+    ifstream datafile("Authors.txt" , ios::in | ios::binary);
+    getline(datafile , line);
+    int start = datafile.tellg();
+    ofstream newfile("tempfile.txt" , ios::out | ios::binary);
+    newfile << line << '\n';
+    while(datafile.tellg() != start+location){
+        getline(datafile , line);
+        newfile << line << '\n';
+    }
+    getline(datafile , line);
+    id = line.substr(0 , line.find("|"));
+    line = line.substr(line.find("|")+1 , line.length());
+    name = line.substr(0 , line.find("|"));
+    line = line.substr(line.find("|")+1 , line.length());
+    if(name.length() != newname.length()){
+        cout << "wrong author name\n";
+        datafile.close();
+        newfile.close();
+        remove("tempfile.txt");
+        return;
+    }
+    newfile << id << '|' << newname << '|' << line << '\n';
+    while(getline(datafile , line))
+        newfile << line << '\n';
+    datafile.close();
+    newfile.close();
+    remove("Authors.txt");
+    rename("tempfile.txt" , "Authors.txt");
+    vector<int> tem = search_secondary(name , "../indexing/SNA.txt");
+    DeleteAttribute("../indexing/SNA.txt",name,tem[0],tem[1],id.substr(1,id.length()));
+    tem = search_secondary(name , "../indexing/SNA.txt");
+    AddAttribute("../indexing/SNA.txt",newname,tem[1] , tem[0], id.substr(1 , id.length()));
+}
 
-void updateBookTitle(int ISBN) {}
+void updateBookTitle(int ISBN , string newtitle) {
+    int location = search(ISBN , "../indexing/PIDB.txt")[1];
+    if(location == -1){
+        cout << "invalid book ISBN\n";
+        return;
+    }
+    string line , name , address , id;
+    ifstream datafile("books.txt" , ios::in | ios::binary);
+    getline(datafile , line);
+    int start = datafile.tellg();
+    ofstream newfile("tempfile.txt" , ios::out | ios::binary);
+    newfile << line << '\n';
+    while(datafile.tellg() != start+location){
+        getline(datafile , line);
+        newfile << line << '\n';
+    }
+    getline(datafile , line);
+    id = line.substr(0 , line.find("|"));
+    line = line.substr(line.find("|")+1 , line.length());
+    name = line.substr(0 , line.find("|"));
+    line = line.substr(line.find("|")+1 , line.length());
+    if(name.length() != newtitle.length()){
+        cout << "wrong book title\n";
+        datafile.close();
+        newfile.close();
+        remove("tempfile.txt");
+        return;
+    }
+    newfile << id << '|' << newtitle << '|' << line << '\n';
+    while(getline(datafile , line))
+        newfile << line << '\n';
+    datafile.close();
+    newfile.close();
+    remove("books.txt");
+    rename("tempfile.txt" , "books.txt");
+   }
 
-void printAuthor(int ID) {}
+void printAuthor(int ID) {
+    int location = search(ID , "../indexing/PIDA.txt")[1];
+    if(location == -1){
+        cout << "invalid Author id\n";
+        return;
+    }
+    ifstream file("Authors.txt", ios::in | ios::binary);
+    string line;
+    getline(file, line);
+    file.seekg(location, ios::cur);
+    getline(file, line);
+    cout << "\tAuthor ID: " << line.substr(0, line.find("|")) << endl;
+    line = line.substr(line.find("|") + 1, line.length());
+    cout << "\tAuthor Name: " << line.substr(0, line.find("|")) << endl;
+    line = line.substr(line.find("|") + 1, line.length());
+    cout << "\tAuthor Address: " << line.substr(0, line.find("|")) << endl;
+    file.close();
+}
 
-void printBook(int ISBN) {}
+void printBook(int ISBN) {
+    int location = search(ISBN , "../indexing/PIDB.txt")[1];
+    if(location == -1){
+        cout << "invalid book isbn\n";
+        return;
+    }
+    ifstream file("books.txt" , ios::in | ios::binary);
+    string line;
+    getline(file , line);
+    file.seekg(location , ios::cur);
+    getline(file , line);
+    cout<<"\tISBN: "<<line.substr(0 , line.find("|"))<<endl;
+    line = line.substr(line.find("|")+1 , line.length());
+    cout<<"\tBook Title: "<<line.substr(0 , line.find("|"))<<endl;
+    line = line.substr(line.find("|")+1 , line.length());
+    cout<<"\tAuthor ID: "<<line.substr(0 , line.find("|"))<<endl;
+    file.close();
+}
 
 vector<string> split(string stringWord, char delimiter) {
     vector<string> queryVector;
@@ -728,19 +836,17 @@ vector<string> split(string stringWord, char delimiter) {
             word = word + stringWord[i];
         }
     }
-    cout<<endl;
-    cout<<"Query Vector"<<endl;
-    for (int i = 0; i < queryVector.size(); i++) {
-        cout << "v[" << i << "]" << queryVector[i] << endl;
-    }
     return queryVector;
 }
-
+void Exit() {
+    cout << "GOOD BYE MY DEAR USER :)";
+    exit(1);
+}
 void writeQuery() {
     // Select all from Authors where Author ID="xxx";
     vector <string> myQuery;
     vector <string> myQuery2;
-    string wantedTubles, wantedTable, wantedAttribute, condition, value, query_1, getquery;
+    string wantedTubles, wantedTable, wantedAttribute, condition, value, query_1, getquery , right , sign;
     cout << "Enter your query :) >>  " << endl;
     cin.ignore();
     getline(cin, query_1);
@@ -754,15 +860,8 @@ void writeQuery() {
     wantedTable = myQuery[3];
     condition = myQuery[5];
     wantedAttribute = condition.substr(0, condition.find("="));
-    condition = condition.substr(condition.find("=")+1 , condition.length());//Select all from Authors where AuthorID=’5566';
-    value = condition.substr(1, condition.length() - 2);
-
-    condition = "=";
-    cout<<"wantedTubles: "<<wantedTubles<<endl;
-    cout<<"wantedTable: "<<wantedTable<<endl;
-    cout<<"wantedAttribute: "<<wantedAttribute<<endl;
-    cout<<"value: "<<value<<endl;
-    cout<<"condition: "<<condition<<endl;
+    sign = condition[condition.find("=")];
+    value = condition.substr(condition.find("=")+2,condition.length()-((condition.find("=")+2)+1));
 
     if(getquery == "select")
     {
@@ -770,8 +869,8 @@ void writeQuery() {
         {
             if(wantedTubles == "*" || wantedTubles == "all")
             {
-                if(condition == "=") {
-                    if (wantedAttribute == "authorid") {
+                if(sign == "="){
+                    if (wantedAttribute == "authorid" || wantedAttribute == "id") {
                         int x = stoi(value);
                         int offset = search(x, "../indexing/PIDA.txt")[1];
                         if(offset == -1){
@@ -791,18 +890,86 @@ void writeQuery() {
                         file.close();
 
                     }
+                    else if(wantedAttribute == "name" || wantedAttribute == "authorname"){
+                        int offset = search_secondary(value , "../indexing/SNA.txt")[1];
+                        if(offset == -1){
+                            cout << "no authors with this name\n";
+                            return;
+                        }
+                        ifstream file("../indexing/listA.txt" , ios::in | ios::binary);
+                        ifstream filedata("Authors.txt" , ios::in | ios::binary);
+                        string line;
+                        getline(filedata , line);
+                        int start = filedata.tellg();
+                        int counter = 1;
+                        while(offset != -1){
+                            file.seekg(offset);
+                            int id;
+                            file >> id >> offset;
+                            int off = search(id , "../indexing/PIDA.txt")[1];
+                            filedata.seekg(off+start);
+                            getline(filedata , line);
+                            cout<<'(' << counter++ << ')'<< '\n';
+                            cout << "\tAuthor ID: " << line.substr(0, line.find("|")) << endl;
+                            line = line.substr(line.find("|") + 1, line.length());
+                            cout << "\tAuthor Name: " << line.substr(0, line.find("|")) << endl;
+                            line = line.substr(line.find("|") + 1, line.length());
+                            cout << "\tAuthor Address: " << line.substr(0, line.find("|")) << endl;
+                        }
+                        file.close();
+                        filedata.close();
+                    }
+
                 }
 
             }
+            else if(wantedTubles == "name" || wantedTubles == "authorname"){
+                if (wantedAttribute == "authorid" || wantedAttribute == "id") {
+                    int x = stoi(value);
+                    int offset = search(x, "../indexing/PIDA.txt")[1];
+                    if(offset == -1){
+                        cout << "invalid Author id";
+                        return;
+                    }
+                    ifstream file("Authors.txt", ios::in | ios::binary);
+                    string line;
+                    getline(file, line);
+                    file.seekg(offset, ios::cur);
+                    getline(file, line);
+                    line = line.substr(line.find("|") + 1, line.length());
+                    cout << "Author Name: " << line.substr(0, line.find("|")) << endl;
+                    file.close();
 
+                }
+
+            }
+            else if(wantedTubles == "address" || wantedTubles=="authoraddress"){
+                if (wantedAttribute == "authorid" || wantedAttribute == "id") {
+                    int x = stoi(value);
+                    int offset = search(x, "../indexing/PIDA.txt")[1];
+                    if(offset == -1){
+                        cout << "invalid Author id";
+                        return;
+                    }
+                    ifstream file("Authors.txt", ios::in | ios::binary);
+                    string line;
+                    getline(file, line);
+                    file.seekg(offset, ios::cur);
+                    getline(file, line);
+                    line = line.substr(line.find("|") + 1, line.length());
+                    line = line.substr(line.find("|") + 1, line.length());
+                    cout << "Author Address: " << line.substr(0, line.find("|")) << endl;
+                    file.close();
+
+                }
+            }
         }
-        else if(wantedTable == "Books")
+        else if(wantedTable == "books")
         {
-            if(wantedTubles == "*" || wantedTubles == "all")
-            {
-                if(condition == "=")
+            if(wantedTubles == "*" || wantedTubles == "all"){
+                if(sign == "=")
                 {
-                    if(wantedAttribute == "ISBN")
+                    if(wantedAttribute == "isbn")
                     {
                         int x = 0;
                         stringstream geek(value);
@@ -821,75 +988,165 @@ void writeQuery() {
                         file.close();
 
                     }
+                    else if(wantedAttribute == "authorid"){
+                        int offset = search_secondary(value , "../indexing/SAIDB.txt")[1];
+                        if(offset == -1){
+                            cout << "no book with this titel\n";
+                            return;
+                        }
+                        ifstream file("../indexing/listB.txt" , ios::in | ios::binary);
+                        ifstream filedata("books.txt" , ios::in | ios::binary);
+                        string line;
+                        getline(filedata , line);
+                        int start = filedata.tellg();
+                        int counter = 1;
+                        while(offset != -1){
+                            file.seekg(offset);
+                            int id;
+                            file >> id >> offset;
+                            int off = search(id , "../indexing/PIDB.txt")[1];
+                            filedata.seekg(off+start);
+                            getline(filedata , line);
+                            cout<<'(' << counter++ << ')'<< '\n';
+                            cout << "\tbook ISBN: " << line.substr(0, line.find("|")) << endl;
+                            line = line.substr(line.find("|") + 1, line.length());
+                            cout << "\tbook title: " << line.substr(0, line.find("|")) << endl;
+                            line = line.substr(line.find("|") + 1, line.length());
+                            cout << "\tAuthor ID: " << line.substr(0, line.find("|")) << endl;
+                        }
+                        file.close();
+                        filedata.close();
+                    }
+                }
+            }
+            else if(wantedTubles == "title" || wantedTubles == "booktitle"){
+                if (wantedAttribute == "isbn") {
+                    int x = stoi(value);
+                    int offset = search(x, "../indexing/PIDB.txt")[1];
+                    if(offset == -1){
+                        cout << "invalid Author id";
+                        return;
+                    }
+                    ifstream file("books.txt", ios::in | ios::binary);
+                    string line;
+                    getline(file, line);
+                    file.seekg(offset, ios::cur);
+                    getline(file, line);
+                    line = line.substr(line.find("|") + 1, line.length());
+                    cout << "book title: " << line.substr(0, line.find("|")) << endl;
+                    file.close();
+
+                }
+                else if(wantedAttribute == "authorid"){
+                    int offset = search_secondary(value , "../indexing/SAIDB.txt")[1];
+                    if(offset == -1){
+                        cout << "no book with this titel\n";
+                        return;
+                    }
+                    ifstream file("../indexing/listB.txt" , ios::in | ios::binary);
+                    ifstream filedata("books.txt" , ios::in | ios::binary);
+                    string line;
+                    getline(filedata , line);
+                    int start = filedata.tellg();
+                    int counter = 1;
+                    while(offset != -1){
+                        file.seekg(offset);
+                        int id;
+                        file >> id >> offset;
+                        int off = search(id , "../indexing/PIDB.txt")[1];
+                        filedata.seekg(off+start);
+                        getline(filedata , line);
+                        cout<<'(' << counter++ << ')'<< '\n';
+                        line = line.substr(line.find("|") + 1, line.length());
+                        cout << "\tbook title: " << line.substr(0, line.find("|")) << endl;
+                    }
+                    file.close();
+                    filedata.close();
+                }
+
+            }
+            else if(wantedTubles == "authorid"){
+                if (wantedAttribute == "isbn") {
+                    int x = stoi(value);
+                    int offset = search(x, "../indexing/PIDB.txt")[1];
+                    if(offset == -1){
+                        cout << "invalid Author id";
+                        return;
+                    }
+                    ifstream file("books.txt", ios::in | ios::binary);
+                    string line;
+                    getline(file, line);
+                    file.seekg(offset, ios::cur);
+                    getline(file, line);
+                    line = line.substr(line.find("|") + 1, line.length());
+                    line = line.substr(line.find("|") + 1, line.length());
+                    cout << "Author id: " << line.substr(0, line.find("|")) << endl;
+                    file.close();
+
                 }
             }
         }
-    }/*
-    else if(getquery == "Delete")
+    }
+
+    else if(getquery == "delete")
     {
-        if(wantedTable == "Authors")
+        if(wantedTable == "authors")
         {
-            if(condition == "=")
+            if(sign == "=")
             {
-                if(wantedAttribute == "Author_ID")
+                if(wantedAttribute == "authorid")
                 {
-                    int x = 0;
-                    stringstream geek(value);
-                    geek >> x;
+                    int x = stoi(value);
                     deleteAuthor(x);
                 }
             }
         }
-        else if(wantedTable == "Books")
+        else if(wantedTable == "books")
         {
-            if(condition == "=")
+            if(sign == "=")
             {
-                if(wantedAttribute == "ISBN")
+                if(wantedAttribute == "isbn")
                 {
-                    int x = 0;
-                    stringstream geek(value);
-                    geek >> x;
+                    int x = stoi(value);
                     deleteBook(x);
                 }
             }
         }
     }
-    else if(getquery == "Update")
+    else if(getquery == "update")
     {
-        if(wantedTable == "Authors")
+        if(wantedTable == "authors")
         {
-            if(condition == "=")
+            if(sign == "=")
             {
-                if(wantedAttribute == "Author_ID")
+                if(wantedAttribute == "authorid")
                 {
-                    int x = 0;
-                    stringstream geek(value);
-                    geek >> x;
-                    updateAuthorName(x);
+                    int x = stoi(value);
+                    string newname = myQuery[6];
+                    updateAuthorName(x , newname);
                 }
             }
         }
-        else if(wantedTable == "Books")
+        else if(wantedTable == "books")
         {
-            if(condition == "=")
+            if(sign == "=")
             {
-                if(wantedAttribute == "ISBN")
+                if(wantedAttribute == "isbn")
                 {
-                    int x = 0;
-                    stringstream geek(value);
-                    geek >> x;
-                    updateBookTitle(x);
+                    int x = stoi(value);
+                    string newtitle = myQuery[6];
+                    updateBookTitle(x , newtitle);
                 }
             }
         }
     }
-    else if(getquery == "Insert")
+    else if(getquery == "insert")
     {
-        if(wantedTable == "Authors")
+        if(wantedTable == "authors")
         {
             addNewAuthor();
         }
-        else if(wantedTable == "Books")
+        else if(wantedTable == "books")
         {
             addNewBook();
         }
@@ -901,14 +1158,10 @@ void writeQuery() {
     else
     {
         cout<<"Invalid Query"<<endl;
-    }*/
+    }
 
 
     //displayQueryResult(wantedTubles, wantedTable, wantedAttribute, condition, value);
 
 }
 
-void Exit() {
-    cout << "GOOD BYE MY DEAR USER :)";
-    exit(1);
-}
